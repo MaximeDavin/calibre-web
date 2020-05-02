@@ -150,10 +150,10 @@ def load_user_from_request(request):
                     return user
                 else:
                     content = ub.User()
-                    content.nickname = user
+                    content.nickname = rp_header_username
                     password = generate_random_password()
                     content.password = generate_password_hash(password)
-                    content.email = user + '@email.com'
+                    content.email = rp_header_username + '@email.com'
                     content.role = config.config_default_role
                     content.sidebar_view = config.config_default_show
                     content.allowed_tags = config.config_allowed_tags
@@ -165,7 +165,7 @@ def load_user_from_request(request):
                         ub.session.commit()
                         return _fetch_user_by_name(rp_header_username)
                     except Exception as e:
-                        log.warning("Failed to create Organizr user: %s - %s", user, e)
+                        log.warning("Failed to create Organizr user: %s - %s", rp_header_username, e)
                         ub.session.rollback()
                         showtext['text'] = _(u'Failed to Create User based on auth headers')
 
