@@ -148,6 +148,27 @@ def load_user_from_request(request):
                 user = _fetch_user_by_name(rp_header_username)
                 if user:
                     return user
+                else:
+                    content = ub.User()
+                    content.nickname = user
+                    password = generate_random_password()
+                    content.password = generate_password_hash(password)
+                    content.email = user + '@email.com'
+                    content.role = config.config_default_role
+                    content.sidebar_view = config.config_default_show
+                    content.allowed_tags = config.config_allowed_tags
+                    content.denied_tags = config.config_denied_tags
+                    content.allowed_column_value = config.config_allowed_column_value
+                    content.denied_column_value = config.config_denied_column_value
+                    ub.session.add(content)
+                    try:
+                        ub.session.commit()
+                        return _fetch_user_by_name(rp_header_username)
+                    except Exception as e:
+                        log.warning("Failed to create Organizr user: %s - %s", user, e)
+                        ub.session.rollback()
+                        showtext['text'] = _(u'Failed to Create User based on auth headers')
+
 
     auth_header = request.headers.get("Authorization")
     if auth_header:
